@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PokemonSoapController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Pokemon SOAP API</a> &gt; <a href="index.source.html" class="el_package">com.pokemon.api.controller</a> &gt; <span class="el_source">PokemonSoapController.java</span></div><h1>PokemonSoapController.java</h1><pre class="source lang-java linenums">package com.pokemon.api.controller;
+
+import com.pokemon.api.service.PokemonService;
+import com.pokemon.soap.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.ws.server.endpoint.annotation.Endpoint;
+import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
+import org.springframework.ws.server.endpoint.annotation.RequestPayload;
+import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
+
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
+
+@Endpoint
+<span class="fc" id="L17">public class PokemonSoapController {</span>
+
+    private static final String NAMESPACE_URI = &quot;http://pokemon.com/api/soap&quot;;
+    
+    @Autowired
+    private PokemonService pokemonService;
+
+    @PayloadRoot(namespace = NAMESPACE_URI, localPart = &quot;getAbilitiesRequest&quot;)
+    @ResponsePayload
+    public GetAbilitiesResponse getAbilities(@RequestPayload org.w3c.dom.Element requestElement) {
+<span class="nc" id="L27">        String originIp = getClientIpAddress();</span>
+        
+        // Extract pokemonName from DOM
+<span class="nc" id="L30">        String pokemonName = null;</span>
+        try {
+<span class="nc" id="L32">            org.w3c.dom.NodeList nodes = requestElement.getElementsByTagName(&quot;pokemonName&quot;);</span>
+<span class="nc bnc" id="L33" title="All 2 branches missed.">            if (nodes.getLength() &gt; 0) {</span>
+<span class="nc" id="L34">                pokemonName = nodes.item(0).getTextContent();</span>
+            }
+<span class="nc" id="L36">        } catch (Exception e) {</span>
+<span class="nc" id="L37">            throw new RuntimeException(&quot;Error extracting pokemonName: &quot; + e.getMessage());</span>
+<span class="nc" id="L38">        }</span>
+        
+<span class="nc bnc" id="L40" title="All 4 branches missed.">        if (pokemonName == null || pokemonName.trim().isEmpty()) {</span>
+<span class="nc" id="L41">            throw new IllegalArgumentException(&quot;pokemonName is required&quot;);</span>
+        }
+        
+<span class="nc" id="L44">        System.out.println(&quot;DEBUG: Extracted pokemonName: &quot; + pokemonName);</span>
+        
+<span class="nc" id="L46">        List&lt;String&gt; abilities = pokemonService.getAbilities(pokemonName, originIp);</span>
+        
+<span class="nc" id="L48">        GetAbilitiesResponse response = new GetAbilitiesResponse();</span>
+<span class="nc" id="L49">        response.getAbilities().addAll(abilities);</span>
+<span class="nc" id="L50">        return response;</span>
+    }
+
+    @PayloadRoot(namespace = NAMESPACE_URI, localPart = &quot;getBaseExperienceRequest&quot;)
+    @ResponsePayload
+    public GetBaseExperienceResponse getBaseExperience(@RequestPayload org.w3c.dom.Element requestElement) {
+<span class="nc" id="L56">        String originIp = getClientIpAddress();</span>
+<span class="nc" id="L57">        String pokemonName = null;</span>
+        try {
+<span class="nc" id="L59">            org.w3c.dom.NodeList nodes = requestElement.getElementsByTagName(&quot;pokemonName&quot;);</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">            if (nodes.getLength() &gt; 0) {</span>
+<span class="nc" id="L61">                pokemonName = nodes.item(0).getTextContent();</span>
+            }
+<span class="nc" id="L63">        } catch (Exception e) {</span>
+<span class="nc" id="L64">            throw new RuntimeException(&quot;Error extracting pokemonName: &quot; + e.getMessage());</span>
+<span class="nc" id="L65">        }</span>
+        
+<span class="nc bnc" id="L67" title="All 4 branches missed.">        if (pokemonName == null || pokemonName.trim().isEmpty()) {</span>
+<span class="nc" id="L68">            throw new IllegalArgumentException(&quot;pokemonName is required&quot;);</span>
+        }
+        
+<span class="nc" id="L71">        Integer baseExperience = pokemonService.getBaseExperience(pokemonName, originIp);</span>
+        
+<span class="nc" id="L73">        GetBaseExperienceResponse response = new GetBaseExperienceResponse();</span>
+<span class="nc" id="L74">        response.setBaseExperience(baseExperience);</span>
+<span class="nc" id="L75">        return response;</span>
+    }
+
+    @PayloadRoot(namespace = NAMESPACE_URI, localPart = &quot;getHeldItemsRequest&quot;)
+    @ResponsePayload
+    public GetHeldItemsResponse getHeldItems(@RequestPayload org.w3c.dom.Element requestElement) {
+<span class="nc" id="L81">        String originIp = getClientIpAddress();</span>
+<span class="nc" id="L82">        String pokemonName = null;</span>
+        try {
+<span class="nc" id="L84">            org.w3c.dom.NodeList nodes = requestElement.getElementsByTagName(&quot;pokemonName&quot;);</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">            if (nodes.getLength() &gt; 0) {</span>
+<span class="nc" id="L86">                pokemonName = nodes.item(0).getTextContent();</span>
+            }
+<span class="nc" id="L88">        } catch (Exception e) {</span>
+<span class="nc" id="L89">            throw new RuntimeException(&quot;Error extracting pokemonName: &quot; + e.getMessage());</span>
+<span class="nc" id="L90">        }</span>
+        
+<span class="nc bnc" id="L92" title="All 4 branches missed.">        if (pokemonName == null || pokemonName.trim().isEmpty()) {</span>
+<span class="nc" id="L93">            throw new IllegalArgumentException(&quot;pokemonName is required&quot;);</span>
+        }
+        
+<span class="nc" id="L96">        List&lt;String&gt; heldItems = pokemonService.getHeldItems(pokemonName, originIp);</span>
+        
+<span class="nc" id="L98">        GetHeldItemsResponse response = new GetHeldItemsResponse();</span>
+<span class="nc" id="L99">        response.getHeldItems().addAll(heldItems);</span>
+<span class="nc" id="L100">        return response;</span>
+    }
+
+    @PayloadRoot(namespace = NAMESPACE_URI, localPart = &quot;getIdRequest&quot;)
+    @ResponsePayload
+    public GetIdResponse getId(@RequestPayload org.w3c.dom.Element requestElement) {
+<span class="nc" id="L106">        String originIp = getClientIpAddress();</span>
+<span class="nc" id="L107">        String pokemonName = null;</span>
+        try {
+<span class="nc" id="L109">            org.w3c.dom.NodeList nodes = requestElement.getElementsByTagName(&quot;pokemonName&quot;);</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">            if (nodes.getLength() &gt; 0) {</span>
+<span class="nc" id="L111">                pokemonName = nodes.item(0).getTextContent();</span>
+            }
+<span class="nc" id="L113">        } catch (Exception e) {</span>
+<span class="nc" id="L114">            throw new RuntimeException(&quot;Error extracting pokemonName: &quot; + e.getMessage());</span>
+<span class="nc" id="L115">        }</span>
+        
+<span class="nc bnc" id="L117" title="All 4 branches missed.">        if (pokemonName == null || pokemonName.trim().isEmpty()) {</span>
+<span class="nc" id="L118">            throw new IllegalArgumentException(&quot;pokemonName is required&quot;);</span>
+        }
+        
+<span class="nc" id="L121">        Integer id = pokemonService.getId(pokemonName, originIp);</span>
+        
+<span class="nc" id="L123">        GetIdResponse response = new GetIdResponse();</span>
+<span class="nc" id="L124">        response.setId(id);</span>
+<span class="nc" id="L125">        return response;</span>
+    }
+
+    @PayloadRoot(namespace = NAMESPACE_URI, localPart = &quot;getNameRequest&quot;)
+    @ResponsePayload
+    public GetNameResponse getName(@RequestPayload org.w3c.dom.Element requestElement) {
+<span class="nc" id="L131">        String originIp = getClientIpAddress();</span>
+<span class="nc" id="L132">        String pokemonName = null;</span>
+        try {
+<span class="nc" id="L134">            org.w3c.dom.NodeList nodes = requestElement.getElementsByTagName(&quot;pokemonName&quot;);</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">            if (nodes.getLength() &gt; 0) {</span>
+<span class="nc" id="L136">                pokemonName = nodes.item(0).getTextContent();</span>
+            }
+<span class="nc" id="L138">        } catch (Exception e) {</span>
+<span class="nc" id="L139">            throw new RuntimeException(&quot;Error extracting pokemonName: &quot; + e.getMessage());</span>
+<span class="nc" id="L140">        }</span>
+        
+<span class="nc bnc" id="L142" title="All 4 branches missed.">        if (pokemonName == null || pokemonName.trim().isEmpty()) {</span>
+<span class="nc" id="L143">            throw new IllegalArgumentException(&quot;pokemonName is required&quot;);</span>
+        }
+        
+<span class="nc" id="L146">        String name = pokemonService.getName(pokemonName, originIp);</span>
+        
+<span class="nc" id="L148">        GetNameResponse response = new GetNameResponse();</span>
+<span class="nc" id="L149">        response.setName(name);</span>
+<span class="nc" id="L150">        return response;</span>
+    }
+
+    @PayloadRoot(namespace = NAMESPACE_URI, localPart = &quot;getLocationAreaEncountersRequest&quot;)
+    @ResponsePayload
+    public GetLocationAreaEncountersResponse getLocationAreaEncounters(@RequestPayload org.w3c.dom.Element requestElement) {
+<span class="nc" id="L156">        String originIp = getClientIpAddress();</span>
+<span class="nc" id="L157">        String pokemonName = null;</span>
+        try {
+<span class="nc" id="L159">            org.w3c.dom.NodeList nodes = requestElement.getElementsByTagName(&quot;pokemonName&quot;);</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">            if (nodes.getLength() &gt; 0) {</span>
+<span class="nc" id="L161">                pokemonName = nodes.item(0).getTextContent();</span>
+            }
+<span class="nc" id="L163">        } catch (Exception e) {</span>
+<span class="nc" id="L164">            throw new RuntimeException(&quot;Error extracting pokemonName: &quot; + e.getMessage());</span>
+<span class="nc" id="L165">        }</span>
+        
+<span class="nc bnc" id="L167" title="All 4 branches missed.">        if (pokemonName == null || pokemonName.trim().isEmpty()) {</span>
+<span class="nc" id="L168">            throw new IllegalArgumentException(&quot;pokemonName is required&quot;);</span>
+        }
+        
+<span class="nc" id="L171">        List&lt;String&gt; locations = pokemonService.getLocationAreaEncounters(pokemonName, originIp);</span>
+        
+<span class="nc" id="L173">        GetLocationAreaEncountersResponse response = new GetLocationAreaEncountersResponse();</span>
+<span class="nc" id="L174">        response.getLocationAreaEncounters().addAll(locations);</span>
+<span class="nc" id="L175">        return response;</span>
+    }
+
+    private String getClientIpAddress() {
+<span class="nc" id="L179">        ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();</span>
+<span class="nc" id="L180">        HttpServletRequest request = attrs.getRequest();</span>
+<span class="nc" id="L181">        String xForwardedForHeader = request.getHeader(&quot;X-Forwarded-For&quot;);</span>
+<span class="nc bnc" id="L182" title="All 2 branches missed.">        if (xForwardedForHeader == null) {</span>
+<span class="nc" id="L183">            return request.getRemoteAddr();</span>
+        } else {
+<span class="nc" id="L185">            return xForwardedForHeader.split(&quot;,&quot;)[0];</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
