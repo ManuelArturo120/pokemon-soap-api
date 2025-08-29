@@ -1,0 +1,3 @@
+@echo off
+echo Final Test
+curl -v -X POST http://localhost:8080/ws -H "Content-Type: text/xml; charset=utf-8" -H "SOAPAction: \"\"" -d "<?xml version=\"1.0\" encoding=\"UTF-8\"?><soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:pok=\"http://pokemon.com/api/soap\"><soapenv:Header/><soapenv:Body><pok:getAbilitiesRequest><pok:pokemonName>pikachu</pok:pokemonName></pok:getAbilitiesRequest></soapenv:Body></soapenv:Envelope>"
