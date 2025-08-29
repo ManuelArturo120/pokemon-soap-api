@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<bindings version="3.0" xmlns="https://jakarta.ee/xml/ns/jaxb">
+  <!--
+
+Este archivo ha sido generado por Eclipse Implementation of JAXB v3.0.0 
+Visite https://eclipse-ee4j.github.io/jaxb-ri 
+Todas las modificaciones realizadas en este archivo se perderán si se vuelve a compilar el esquema de origen. 
+Generado el: 2025.08.28 a las 04:30:24 AM CDT 
+
+  -->
+  <bindings scd="x-schema::tns" xmlns:tns="http://pokemon.com/api/soap">
+    <schemaBindings map="false">
+      <package name="com.pokemon.api.soap"/>
+    </schemaBindings>
+    <bindings scd="tns:getAbilitiesRequest">
+      <class ref="com.pokemon.api.soap.GetAbilitiesRequest"/>
+    </bindings>
+    <bindings scd="tns:getBaseExperienceRequest">
+      <class ref="com.pokemon.api.soap.GetBaseExperienceRequest"/>
+    </bindings>
+    <bindings scd="tns:getHeldItemsRequest">
+      <class ref="com.pokemon.api.soap.GetHeldItemsRequest"/>
+    </bindings>
+    <bindings scd="tns:getIdRequest">
+      <class ref="com.pokemon.api.soap.GetIdRequest"/>
+    </bindings>
+    <bindings scd="tns:getNameRequest">
+      <class ref="com.pokemon.api.soap.GetNameRequest"/>
+    </bindings>
+    <bindings scd="tns:getLocationAreaEncountersRequest">
+      <class ref="com.pokemon.api.soap.GetLocationAreaEncountersRequest"/>
+    </bindings>
+    <bindings scd="tns:getAbilitiesResponse">
+      <class ref="com.pokemon.api.soap.GetAbilitiesResponse"/>
+    </bindings>
+    <bindings scd="tns:getBaseExperienceResponse">
+      <class ref="com.pokemon.api.soap.GetBaseExperienceResponse"/>
+    </bindings>
+    <bindings scd="tns:getHeldItemsResponse">
+      <class ref="com.pokemon.api.soap.GetHeldItemsResponse"/>
+    </bindings>
+    <bindings scd="tns:getIdResponse">
+      <class ref="com.pokemon.api.soap.GetIdResponse"/>
+    </bindings>
+    <bindings scd="tns:getNameResponse">
+      <class ref="com.pokemon.api.soap.GetNameResponse"/>
+    </bindings>
+    <bindings scd="tns:getLocationAreaEncountersResponse">
+      <class ref="com.pokemon.api.soap.GetLocationAreaEncountersResponse"/>
+    </bindings>
+  </bindings>
+</bindings>
+

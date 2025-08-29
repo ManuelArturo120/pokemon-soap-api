@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PokemonService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Pokemon SOAP API</a> &gt; <a href="index.source.html" class="el_package">com.pokemon.api.service</a> &gt; <span class="el_source">PokemonService.java</span></div><h1>PokemonService.java</h1><pre class="source lang-java linenums">package com.pokemon.api.service;
+
+import com.pokemon.api.model.PokemonData;
+import com.pokemon.api.model.PokemonRequest;
+import com.pokemon.api.repository.PokemonRequestRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class PokemonService {
+
+    private final WebClient webClient;
+    private final PokemonRequestRepository requestRepository;
+    private static final String POKEMON_API_URL = &quot;https://pokeapi.co/api/v2/pokemon/&quot;;
+
+    @Autowired
+<span class="fc" id="L23">    public PokemonService(WebClient.Builder webClientBuilder, PokemonRequestRepository requestRepository) {</span>
+<span class="fc" id="L24">        this.webClient = webClientBuilder.baseUrl(POKEMON_API_URL).build();</span>
+<span class="fc" id="L25">        this.requestRepository = requestRepository;</span>
+<span class="fc" id="L26">    }</span>
+
+    public List&lt;String&gt; getAbilities(String pokemonName, String originIp) {
+<span class="nc" id="L29">        long startTime = System.currentTimeMillis();</span>
+<span class="nc bnc" id="L30" title="All 4 branches missed.">        String safePokemonName = (pokemonName != null &amp;&amp; !pokemonName.trim().isEmpty()) ? pokemonName.trim() : &quot;pikachu&quot;;</span>
+        
+        try {
+<span class="nc" id="L33">            PokemonData pokemon = fetchPokemonData(safePokemonName);</span>
+<span class="nc" id="L34">            List&lt;String&gt; abilities = pokemon.getAbilities().stream()</span>
+<span class="nc" id="L35">                    .map(ability -&gt; ability.getAbility().getName())</span>
+<span class="nc" id="L36">                    .collect(Collectors.toList());</span>
+            
+            // Save request log
+<span class="nc" id="L39">            PokemonRequest request = new PokemonRequest();</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">            request.setOriginIp(originIp != null ? originIp : &quot;127.0.0.1&quot;);</span>
+<span class="nc" id="L41">            request.setMethodExecuted(&quot;getAbilities&quot;);</span>
+<span class="nc" id="L42">            request.setPokemonName(safePokemonName);</span>
+<span class="nc" id="L43">            request.setRequestDate(java.time.LocalDateTime.now());</span>
+<span class="nc" id="L44">            request.setDurationMs(System.currentTimeMillis() - startTime);</span>
+<span class="nc" id="L45">            request.setResponseStatus(&quot;SUCCESS&quot;);</span>
+<span class="nc" id="L46">            requestRepository.save(request);</span>
+            
+<span class="nc" id="L48">            return abilities;</span>
+<span class="nc" id="L49">        } catch (Exception e) {</span>
+            // Save error log
+<span class="nc" id="L51">            PokemonRequest request = new PokemonRequest();</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">            request.setOriginIp(originIp != null ? originIp : &quot;127.0.0.1&quot;);</span>
+<span class="nc" id="L53">            request.setMethodExecuted(&quot;getAbilities&quot;);</span>
+<span class="nc" id="L54">            request.setPokemonName(safePokemonName);</span>
+<span class="nc" id="L55">            request.setRequestDate(java.time.LocalDateTime.now());</span>
+<span class="nc" id="L56">            request.setDurationMs(System.currentTimeMillis() - startTime);</span>
+<span class="nc" id="L57">            request.setResponseStatus(&quot;ERROR: &quot; + e.getMessage());</span>
+<span class="nc" id="L58">            requestRepository.save(request);</span>
+            
+<span class="nc" id="L60">            throw new RuntimeException(&quot;Error fetching abilities for &quot; + safePokemonName, e);</span>
+        }
+    }
+
+    public Integer getBaseExperience(String pokemonName, String originIp) {
+<span class="nc" id="L65">        long startTime = System.currentTimeMillis();</span>
+<span class="nc" id="L66">        PokemonRequest request = new PokemonRequest(originIp, &quot;getBaseExperience&quot;, pokemonName);</span>
+        
+        try {
+<span class="nc" id="L69">            PokemonData pokemon = fetchPokemonData(pokemonName);</span>
+<span class="nc" id="L70">            Integer baseExperience = pokemon.getBaseExperience();</span>
+            
+<span class="nc" id="L72">            request.setDurationMs(System.currentTimeMillis() - startTime);</span>
+<span class="nc" id="L73">            request.setResponseStatus(&quot;SUCCESS&quot;);</span>
+<span class="nc" id="L74">            requestRepository.save(request);</span>
+            
+<span class="nc" id="L76">            return baseExperience;</span>
+<span class="nc" id="L77">        } catch (Exception e) {</span>
+<span class="nc" id="L78">            request.setDurationMs(System.currentTimeMillis() - startTime);</span>
+<span class="nc" id="L79">            request.setResponseStatus(&quot;ERROR: &quot; + e.getMessage());</span>
+<span class="nc" id="L80">            requestRepository.save(request);</span>
+<span class="nc" id="L81">            throw new RuntimeException(&quot;Error fetching base experience for &quot; + pokemonName, e);</span>
+        }
+    }
+
+    public List&lt;String&gt; getHeldItems(String pokemonName, String originIp) {
+<span class="nc" id="L86">        long startTime = System.currentTimeMillis();</span>
+<span class="nc" id="L87">        PokemonRequest request = new PokemonRequest(originIp, &quot;getHeldItems&quot;, pokemonName);</span>
+        
+        try {
+<span class="nc" id="L90">            PokemonData pokemon = fetchPokemonData(pokemonName);</span>
+<span class="nc" id="L91">            List&lt;String&gt; heldItems = pokemon.getHeldItems().stream()</span>
+<span class="nc" id="L92">                    .map(item -&gt; item.getItem().getName())</span>
+<span class="nc" id="L93">                    .collect(Collectors.toList());</span>
+            
+<span class="nc" id="L95">            request.setDurationMs(System.currentTimeMillis() - startTime);</span>
+<span class="nc" id="L96">            request.setResponseStatus(&quot;SUCCESS&quot;);</span>
+<span class="nc" id="L97">            requestRepository.save(request);</span>
+            
+<span class="nc" id="L99">            return heldItems;</span>
+<span class="nc" id="L100">        } catch (Exception e) {</span>
+<span class="nc" id="L101">            request.setDurationMs(System.currentTimeMillis() - startTime);</span>
+<span class="nc" id="L102">            request.setResponseStatus(&quot;ERROR: &quot; + e.getMessage());</span>
+<span class="nc" id="L103">            requestRepository.save(request);</span>
+<span class="nc" id="L104">            throw new RuntimeException(&quot;Error fetching held items for &quot; + pokemonName, e);</span>
+        }
+    }
+
+    public Integer getId(String pokemonName, String originIp) {
+<span class="nc" id="L109">        long startTime = System.currentTimeMillis();</span>
+        
+        try {
+<span class="nc bnc" id="L112" title="All 2 branches missed.">            PokemonData pokemon = fetchPokemonData(pokemonName != null ? pokemonName : &quot;pikachu&quot;);</span>
+<span class="nc" id="L113">            Integer id = pokemon.getId();</span>
+            
+            // Save request log
+<span class="nc" id="L116">            PokemonRequest request = new PokemonRequest();</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">            request.setOriginIp(originIp != null ? originIp : &quot;127.0.0.1&quot;);</span>
+<span class="nc" id="L118">            request.setMethodExecuted(&quot;getId&quot;);</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">            request.setPokemonName(pokemonName != null ? pokemonName : &quot;pikachu&quot;);</span>
+<span class="nc" id="L120">            request.setRequestDate(java.time.LocalDateTime.now());</span>
+<span class="nc" id="L121">            request.setDurationMs(System.currentTimeMillis() - startTime);</span>
+<span class="nc" id="L122">            request.setResponseStatus(&quot;SUCCESS&quot;);</span>
+<span class="nc" id="L123">            requestRepository.save(request);</span>
+            
+<span class="nc" id="L125">            return id;</span>
+<span class="nc" id="L126">        } catch (Exception e) {</span>
+            // Save error log
+<span class="nc" id="L128">            PokemonRequest request = new PokemonRequest();</span>
+<span class="nc bnc" id="L129" title="All 2 branches missed.">            request.setOriginIp(originIp != null ? originIp : &quot;127.0.0.1&quot;);</span>
+<span class="nc" id="L130">            request.setMethodExecuted(&quot;getId&quot;);</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">            request.setPokemonName(pokemonName != null ? pokemonName : &quot;pikachu&quot;);</span>
+<span class="nc" id="L132">            request.setRequestDate(java.time.LocalDateTime.now());</span>
+<span class="nc" id="L133">            request.setDurationMs(System.currentTimeMillis() - startTime);</span>
+<span class="nc" id="L134">            request.setResponseStatus(&quot;ERROR: &quot; + e.getMessage());</span>
+<span class="nc" id="L135">            requestRepository.save(request);</span>
+            
+<span class="nc" id="L137">            throw new RuntimeException(&quot;Error fetching ID for &quot; + pokemonName, e);</span>
+        }
+    }
+
+    public String getName(String pokemonName, String originIp) {
+<span class="nc" id="L142">        long startTime = System.currentTimeMillis();</span>
+<span class="nc" id="L143">        PokemonRequest request = new PokemonRequest(originIp, &quot;getName&quot;, pokemonName);</span>
+        
+        try {
+<span class="nc" id="L146">            PokemonData pokemon = fetchPokemonData(pokemonName);</span>
+<span class="nc" id="L147">            String name = pokemon.getName();</span>
+            
+<span class="nc" id="L149">            request.setDurationMs(System.currentTimeMillis() - startTime);</span>
+<span class="nc" id="L150">            request.setResponseStatus(&quot;SUCCESS&quot;);</span>
+<span class="nc" id="L151">            requestRepository.save(request);</span>
+            
+<span class="nc" id="L153">            return name;</span>
+<span class="nc" id="L154">        } catch (Exception e) {</span>
+<span class="nc" id="L155">            request.setDurationMs(System.currentTimeMillis() - startTime);</span>
+<span class="nc" id="L156">            request.setResponseStatus(&quot;ERROR: &quot; + e.getMessage());</span>
+<span class="nc" id="L157">            requestRepository.save(request);</span>
+<span class="nc" id="L158">            throw new RuntimeException(&quot;Error fetching name for &quot; + pokemonName, e);</span>
+        }
+    }
+
+    public List&lt;String&gt; getLocationAreaEncounters(String pokemonName, String originIp) {
+<span class="nc" id="L163">        long startTime = System.currentTimeMillis();</span>
+<span class="nc" id="L164">        PokemonRequest request = new PokemonRequest(originIp, &quot;getLocationAreaEncounters&quot;, pokemonName);</span>
+        
+        try {
+            // First get pokemon data to get the location_area_encounters URL
+<span class="nc" id="L168">            PokemonData pokemon = fetchPokemonData(pokemonName);</span>
+<span class="nc" id="L169">            String locationUrl = pokemon.getLocationAreaEncounters();</span>
+            
+            // Fetch location data if URL exists
+<span class="nc" id="L172">            List&lt;String&gt; locations = List.of(); // Default empty list</span>
+<span class="nc bnc" id="L173" title="All 4 branches missed.">            if (locationUrl != null &amp;&amp; !locationUrl.isEmpty()) {</span>
+                // This would require additional API call to the location URL
+                // For simplicity, returning the URL as a single item
+<span class="nc" id="L176">                locations = List.of(locationUrl);</span>
+            }
+            
+<span class="nc" id="L179">            request.setDurationMs(System.currentTimeMillis() - startTime);</span>
+<span class="nc" id="L180">            request.setResponseStatus(&quot;SUCCESS&quot;);</span>
+<span class="nc" id="L181">            requestRepository.save(request);</span>
+            
+<span class="nc" id="L183">            return locations;</span>
+<span class="nc" id="L184">        } catch (Exception e) {</span>
+<span class="nc" id="L185">            request.setDurationMs(System.currentTimeMillis() - startTime);</span>
+<span class="nc" id="L186">            request.setResponseStatus(&quot;ERROR: &quot; + e.getMessage());</span>
+<span class="nc" id="L187">            requestRepository.save(request);</span>
+<span class="nc" id="L188">            throw new RuntimeException(&quot;Error fetching location area encounters for &quot; + pokemonName, e);</span>
+        }
+    }
+
+    private PokemonData fetchPokemonData(String pokemonName) {
+<span class="nc bnc" id="L193" title="All 4 branches missed.">        String name = (pokemonName != null &amp;&amp; !pokemonName.trim().isEmpty()) ? pokemonName.trim() : &quot;pikachu&quot;;</span>
+        
+        try {
+<span class="nc" id="L196">            return webClient.get()</span>
+<span class="nc" id="L197">                    .uri(name.toLowerCase())</span>
+<span class="nc" id="L198">                    .retrieve()</span>
+<span class="nc" id="L199">                    .bodyToMono(PokemonData.class)</span>
+<span class="nc" id="L200">                    .timeout(java.time.Duration.ofSeconds(10))</span>
+<span class="nc" id="L201">                    .block();</span>
+<span class="nc" id="L202">        } catch (Exception e) {</span>
+<span class="nc" id="L203">            throw new RuntimeException(&quot;Error fetching Pokemon data for: &quot; + name + &quot;. Error: &quot; + e.getMessage(), e);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
